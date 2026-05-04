@@ -137,6 +137,60 @@ curl -s -X POST \
   -d '{"name": "my-new-project", "private": false}'
 ```
 
+### From Existing Local Directory — CLEAN INIT
+
+**⚠️ CRITICAL: Create .gitignore BEFORE the first commit.**
+
+```bash
+# If you ran `git add .` and committed venv/node_modules/venv by mistake:
+mv venv /tmp/project_venv_backup   # save it
+git reset --hard HEAD~1           # go back before the bad commit
+# now create .gitignore properly (see below)
+git add -A                         # will respect .gitignore this time
+git commit -m "Initial commit"
+```
+
+**Proper sequence:**
+```bash
+cd /path/to/project
+
+# 1. Create .gitignore FIRST (before any git add)
+echo "venv/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.local
+logs/*.log
+.idea/
+.vscode/
+*.swp
+.DS_Store
+chroma_db/
+chromadb/
+dump.rdb
+htmlcov/
+.coverage
+.pytest_cache/" > .gitignore
+
+# 2. Initialize and add only what should be tracked
+git init
+git add .gitignore README.md src/ config/ tests/ ...  # explicit paths, NOT `git add .`
+
+# Alternative: add all respecting .gitignore
+git add -A
+
+# 3. Verify what will be committed
+git status --short   # check no venv/, __pycache__/, .env listed
+
+# 4. Commit and push
+git commit -m "Initial commit"
+gh repo create my-project --private --source=. --push
+# OR if already created:
+git remote add origin git@github.com:$GH_USER/my-project.git
+git push -u origin master
+```
+
 ### From a Template
 
 **With gh:**
